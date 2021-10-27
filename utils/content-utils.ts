@@ -5,6 +5,44 @@ import matter from 'gray-matter';
 import path from 'path';
 import { getPlaiceholder, IGetPlaiceholderReturn } from 'plaiceholder';
 
+export const getParentPages = (contentPath: string) => {
+  let folderPath = path.resolve('public', contentPath, '../');
+  const parentFolders: string[] = [];
+  const rootPath = path.resolve('public');
+  while (folderPath !== rootPath) {
+    parentFolders.push(folderPath);
+    folderPath = path.resolve('public', folderPath, '../');
+  }
+
+  return parentFolders;
+};
+
+export const getParentPagesWithData = (contentPath: string) => {
+  const parentFolders = getParentPages(contentPath);
+
+  return Promise.all(
+    parentFolders.map(async (page) => {
+      const pathElements = page.split('/');
+      const slug = pathElements[pathElements.length - 1];
+      let meta = null;
+      // get metadata
+      try {
+        const mdFile = await fs.promises.readFile(`${page}/${slug}.mdx`);
+        const { data } = matter(mdFile);
+        meta = data;
+      } catch (e) {
+        // console.error(e);
+        // index.mdx => no meta
+      }
+
+      return {
+        meta: meta || null,
+        slug,
+      };
+    })
+  );
+};
+
 /**
  *
  * @param contentPath path relative to 'public' folder
@@ -15,11 +53,17 @@ export const getSubPages = (
   level = 1
 ): Promise<string[]> => {
   const absolutePath = path.resolve(process.cwd(), 'public', contentPath);
-  return glob('**/*mdx', {
+  return glob('**/*.mdx', {
     cwd: absolutePath,
-  }).then((files) =>
-    files.filter((path) => path.match(/\//g)?.length <= level)
-  );
+  }).then((files) => {
+    return files
+      .filter((path) => {
+        return level === 0
+          ? path.match(/\//g) === null
+          : path.match(/\//g)?.length <= level;
+      })
+      .map((mdFileName) => mdFileName.replace('.mdx', ''));
+  });
 };
 
 /**
@@ -41,15 +85,15 @@ export const getSubPagesWithData = async (
   const subPages = await getSubPages(contentPath, level).then((subPages) => {
     return Promise.all(
       subPages.map(async (pageName) => {
+        const slug = path.basename(pageName, '.mdx');
         // get metadata
         const { data: meta } = matter(
-          fs.readFileSync(`${absolutePath}/${pageName}`)
+          fs.readFileSync(`${absolutePath}/${pageName}.mdx`)
         );
-        const slug = path.basename(pageName, '.mdx');
 
         // generate placeholder image
         const imageProps = await fetchImageProps(
-          `/${contentPath}/${path.dirname(pageName)}/${slug}.jpg`
+          `/${contentPath}/${pageName}.jpg`
         );
 
         return {

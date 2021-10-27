@@ -1,5 +1,6 @@
 import React from 'react';
 import { MetaProps } from '../types/layout';
+import { Breadcrumbs } from './breadcrumbs';
 import Head from './head';
 import Navigation from './navigation';
 import ThemeSwitch from './theme-switch';
@@ -21,6 +22,7 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
             <Navigation />
             <ThemeSwitch />
           </div>
+          <Breadcrumbs />
         </div>
       </header>
       <main>

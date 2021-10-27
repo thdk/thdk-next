@@ -16,6 +16,7 @@ import { MetaProps } from '../../types/layout';
 import { Hike } from '../../types/post';
 import {
   fetchImageProps,
+  getParentPagesWithData,
   getSubPages,
   getSubPagesWithData,
   ImageProps,
@@ -24,6 +25,7 @@ import { HIKES_PATH } from '../../paths';
 import glob from 'glob-promise';
 import { useRouter } from 'next/router';
 import { Article } from '../../components/article';
+import { PageContextProvider } from '../../contexts/page-context';
 
 const components = {
   Head,
@@ -36,6 +38,7 @@ type PostPageProps = {
   frontMatter: Hike;
   images: ImageProps[];
   subHikes: any[];
+  parents: string[];
 };
 
 const HikePage = ({
@@ -43,6 +46,7 @@ const HikePage = ({
   frontMatter: { title, description, image, date },
   images,
   subHikes,
+  parents,
 }: PostPageProps): JSX.Element => {
   const customMeta: MetaProps = {
     title: `${title}`,
@@ -56,37 +60,38 @@ const HikePage = ({
   const { slug: slugParts } = router.query;
 
   const slug = Array.isArray(slugParts) ? slugParts.join('/') : slugParts;
-
   return (
-    <Layout customMeta={customMeta}>
-      <Article date={date ? parseISO(date) : undefined} title={title}>
-        <MDXRemote {...source} components={components} />
-      </Article>
+    <PageContextProvider parents={parents}>
+      <Layout customMeta={customMeta}>
+        <Article date={date ? parseISO(date) : undefined} title={title}>
+          <MDXRemote {...source} components={components} />
+        </Article>
 
-      <div className="flex grid grid-cols-1 md:grid-cols-3 gap-2">
-        {subHikes.map(({ slug: subHike, imageProps, meta: { title } }) => {
-          return (
-            <Link key={subHike} href={`/hikes/${slug}/${subHike}`}>
-              <div>
-                {title}
-                <Image
-                  {...imageProps}
-                  sizes="(max-width: 600px) 100vw, 1024/3vw"
-                  objectFit="contain"
-                  placeholder="blur"
-                />
-              </div>
-            </Link>
-          );
-        })}
-      </div>
+        <div className="flex grid grid-cols-1 md:grid-cols-3 gap-2">
+          {subHikes.map(({ slug: subHike, imageProps, meta: { title } }) => {
+            return (
+              <Link key={subHike} href={`/hikes/${slug}/${subHike}`}>
+                <div>
+                  {title}
+                  <Image
+                    {...imageProps}
+                    sizes="(max-width: 600px) 100vw, 1024/3vw"
+                    objectFit="contain"
+                    placeholder="blur"
+                  />
+                </div>
+              </Link>
+            );
+          })}
+        </div>
 
-      <div className="grid grid-3 gap-4">
-        {images.map((image, i) => (
-          <Image key={i} {...image} objectFit="contain" placeholder="blur" />
-        ))}
-      </div>
-    </Layout>
+        <div className="grid grid-3 gap-4">
+          {images.map((image, i) => (
+            <Image key={i} {...image} objectFit="contain" placeholder="blur" />
+          ))}
+        </div>
+      </Layout>
+    </PageContextProvider>
   );
 };
 
@@ -113,7 +118,10 @@ export const getStaticProps: GetStaticProps<any, any> = async ({
   // meta
   const { content, data } = matter(source);
 
+  // children
   const subHikes = await getSubPagesWithData(relativePath);
+
+  const parents = await getParentPagesWithData(relativePath);
 
   // parse content
   const mdxSource = await serialize(content, {
@@ -131,6 +139,7 @@ export const getStaticProps: GetStaticProps<any, any> = async ({
       frontMatter: data,
       images,
       subHikes,
+      parents,
     },
   };
 };

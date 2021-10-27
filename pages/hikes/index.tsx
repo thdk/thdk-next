@@ -43,7 +43,6 @@ const HikesPage = ({ hikes }: HikesPageProps): JSX.Element => {
 
 export const getStaticProps: GetStaticProps = async () => {
   const hikes = await getSubPagesWithData(HIKES_PATH);
-
   return {
     props: {
       hikes,
