@@ -15,7 +15,7 @@ import rehypeSlug from 'rehype-slug';
 import Layout, { WEBSITE_HOST_URL } from '../../components/layout';
 import { MetaProps } from '../../types/layout';
 import { Post } from '../../types/post';
-import { POSTS_PATH } from '../../paths';
+import { POSTS_PATH } from '../../constants';
 import { getSubPages } from '../../utils/content-utils';
 
 // Custom components/renderers to pass to MDX.

@@ -1,7 +1,7 @@
 import fs from 'fs';
 import path from 'path';
 import matter from 'gray-matter';
-import { POSTS_PATH } from '../paths';
+import { POSTS_PATH } from '../constants';
 
 export function getPostSlugs(): string[] {
   return fs.readdirSync(path.resolve(process.cwd(), 'public', POSTS_PATH));

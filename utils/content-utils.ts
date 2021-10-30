@@ -5,7 +5,7 @@ import matter from 'gray-matter';
 import path from 'path';
 import { getPlaiceholder, IGetPlaiceholderReturn } from 'plaiceholder';
 
-export const getParentPages = (contentPath: string) => {
+export const getParentPages = (contentPath: string): string[] => {
   let folderPath = path.resolve('public', contentPath, '../');
   const parentFolders: string[] = [];
   const rootPath = path.resolve('public');
@@ -17,7 +17,9 @@ export const getParentPages = (contentPath: string) => {
   return parentFolders;
 };
 
-export const getParentPagesWithData = (contentPath: string) => {
+export const getParentPagesWithData = <T extends Record<string, string>>(
+  contentPath: string
+): Promise<{ slug: string; meta: T }[]> => {
   const parentFolders = getParentPages(contentPath);
 
   return Promise.all(

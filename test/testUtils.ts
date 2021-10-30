@@ -15,7 +15,7 @@ const Providers = ({ children }: PropsWithChildren<unknown>) => {
   // )
 };
 
-const customRender = (ui: any, options = {}): any =>
+const customRender = (ui: JSX.Element, options = {}): any =>
   render(ui, { wrapper: Providers, ...options } as any);
 
 // re-export everything

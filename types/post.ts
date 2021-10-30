@@ -6,4 +6,4 @@ export type Post = {
   title: string;
 };
 
-export type Hike = Post;
+export type ContentPageMeta = Post;
