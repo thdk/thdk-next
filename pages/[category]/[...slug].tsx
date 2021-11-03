@@ -29,12 +29,7 @@ import { useRouter } from 'next/router';
 import { Article } from '../../components/article';
 import { PageContextProvider } from '../../contexts/page-context';
 import { ExifTags } from 'ts-exif-parser';
-
-const components = {
-  Head,
-  Image,
-  Link,
-};
+import { RelativePathImage } from '../../components/relatative-path-image';
 
 type PostPageProps = {
   source: MDXRemoteSerializeResult;
@@ -66,6 +61,15 @@ const ContentPage = ({
   const { slug: slugParts, category } = router.query;
 
   const page = Array.isArray(slugParts) ? slugParts.join('/') : slugParts;
+
+  const components = {
+    Head,
+    Image: (props: ImageProps) => (
+      <RelativePathImage {...props} basePath={`/${category}/${page}`} />
+    ),
+    Link,
+  };
+
   return (
     <PageContextProvider parents={parents}>
       <Layout customMeta={customMeta}>

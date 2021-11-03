@@ -17,7 +17,7 @@ export function Article({
           {format(date, 'MMMM dd, yyyy')}
         </p>
       )}
-      <div className="prose dark:prose-dark">{children}</div>
+      <div>{children}</div>
     </article>
   );
 }
