@@ -58,13 +58,11 @@ export const getSubPages = (
   return glob('**/*.mdx', {
     cwd: absolutePath,
   }).then((files) => {
-    return files
-      .filter((path) => {
-        return level === 0
-          ? path.match(/\//g) === null
-          : path.match(/\//g)?.length <= level;
-      })
-      .map((mdFileName) => mdFileName.replace('.mdx', ''));
+    return files.filter((path) => {
+      return level === 0
+        ? path.match(/\//g) === null
+        : path.match(/\//g)?.length <= level;
+    });
   });
 };
 
@@ -90,12 +88,14 @@ export const getSubPagesWithData = async (
         const slug = path.basename(pageName, '.mdx');
         // get metadata
         const { data: meta } = matter(
-          fs.readFileSync(`${absolutePath}/${pageName}.mdx`)
+          fs.readFileSync(`${absolutePath}/${pageName}`)
         );
 
         // generate placeholder image
         const imageProps = await fetchImageProps(
-          `/${contentPath}/${pageName}.jpg`
+          `/${contentPath}/${path.dirname(pageName)}/${
+            meta.image ? meta.image : slug + '.jpg'
+          }`
         );
 
         return {

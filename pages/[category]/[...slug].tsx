@@ -21,11 +21,14 @@ import {
   getSubPagesWithData,
   ImageProps,
 } from '../../utils/content-utils';
+import { parseExif } from '../../utils/parse-exif';
+
 import { CONTENT_PAGE_CATEGORIES } from '../../constants';
 import glob from 'glob-promise';
 import { useRouter } from 'next/router';
 import { Article } from '../../components/article';
 import { PageContextProvider } from '../../contexts/page-context';
+import { ExifTags } from 'ts-exif-parser';
 
 const components = {
   Head,
@@ -36,7 +39,10 @@ const components = {
 type PostPageProps = {
   source: MDXRemoteSerializeResult;
   frontMatter: ContentPageMeta;
-  images: ImageProps[];
+  images: {
+    imageProps: ImageProps;
+    imageExif: ExifTags;
+  }[];
   subPages: any[];
   parents: string[];
 };
@@ -67,7 +73,7 @@ const ContentPage = ({
           <MDXRemote {...source} components={components} />
         </Article>
 
-        <div className="flex grid grid-cols-1 md:grid-cols-3 gap-2">
+        <div className="flex grid grid-cols-1 md:grid-cols-3 gap-2 mt-4">
           {subPages.map(({ slug: subPage, imageProps, meta: { title } }) => {
             return (
               <Link key={subPage} href={`/${category}/${page}/${subPage}`}>
@@ -86,9 +92,14 @@ const ContentPage = ({
         </div>
 
         <div className="grid grid-3 gap-4">
-          {images.map((image, i) => (
-            <Image key={i} {...image} objectFit="contain" placeholder="blur" />
-          ))}
+          {images.map(({ imageProps, imageExif }, i) => {
+            return (
+              <div key={i}>
+                <Image {...imageProps} objectFit="contain" placeholder="blur" />
+                {imageExif.ImageDescription}
+              </div>
+            );
+          })}
         </div>
       </Layout>
     </PageContextProvider>
@@ -108,7 +119,14 @@ export const getStaticProps: GetStaticProps<any, any> = async ({
     cwd: absolutePath,
   }).then((imagePaths) =>
     Promise.all(
-      imagePaths.map((image) => fetchImageProps(`/${relativePath}/${image}`))
+      imagePaths.map(async (image) => {
+        const imageProps = await fetchImageProps(`/${relativePath}/${image}`);
+        const imageExif = await parseExif(`/${absolutePath}/${image}`);
+        return {
+          imageProps,
+          imageExif,
+        };
+      })
     )
   );
 
