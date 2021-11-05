@@ -29,7 +29,7 @@ import { useRouter } from 'next/router';
 import { Article } from '../../components/article';
 import { PageContextProvider } from '../../contexts/page-context';
 import { ExifTags } from 'ts-exif-parser';
-import { RelativePathImage } from '../../components/relatative-path-image';
+import { ArticleImage } from '../../components/article-image';
 
 type PostPageProps = {
   source: MDXRemoteSerializeResult;
@@ -39,7 +39,10 @@ type PostPageProps = {
     imageExif: ExifTags;
   }[];
   subPages: any[];
-  parents: string[];
+  parents: {
+    slug: string;
+    meta: MetaProps;
+  }[];
 };
 
 const ContentPage = ({
@@ -61,11 +64,11 @@ const ContentPage = ({
   const { slug: slugParts, category } = router.query;
 
   const page = Array.isArray(slugParts) ? slugParts.join('/') : slugParts;
-
+  const parentPage = page.substring(0, page.lastIndexOf('/'));
   const components = {
     Head,
     Image: (props: ImageProps) => (
-      <RelativePathImage {...props} basePath={`/${category}/${page}`} />
+      <ArticleImage {...props} basePath={`/${category}/${page}`} />
     ),
     Link,
   };
@@ -105,6 +108,12 @@ const ContentPage = ({
             );
           })}
         </div>
+
+        {parents.length > 0 ? (
+          <div>
+            <Link href={`/${category}/${parentPage}`}>Back to overwiew</Link>
+          </div>
+        ) : null}
       </Layout>
     </PageContextProvider>
   );
@@ -119,7 +128,7 @@ export const getStaticProps: GetStaticProps<any, any> = async ({
   const absolutePath = path.join(process.cwd(), 'public', relativePath);
 
   // images
-  const images = await glob('images/*.jpg', {
+  const images = await glob('gallery/*.jpg', {
     cwd: absolutePath,
   }).then((imagePaths) =>
     Promise.all(
@@ -135,7 +144,12 @@ export const getStaticProps: GetStaticProps<any, any> = async ({
   );
 
   // content
-  const source = fs.readFileSync(`${absolutePath}/${slug}.mdx`);
+  let source;
+  try {
+    source = fs.readFileSync(`${absolutePath}/article.mdx`);
+  } catch {
+    source = fs.readFileSync(`${absolutePath}/${slug}.mdx`);
+  }
 
   // meta
   const { content, data } = matter(source);

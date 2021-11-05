@@ -85,7 +85,7 @@ export const getSubPagesWithData = async (
   const subPages = await getSubPages(contentPath, level).then((subPages) => {
     return Promise.all(
       subPages.map(async (pageName) => {
-        const slug = path.basename(pageName, '.mdx');
+        const slug = path.dirname(pageName);
         // get metadata
         const { data: meta } = matter(
           fs.readFileSync(`${absolutePath}/${pageName}`)
@@ -93,9 +93,7 @@ export const getSubPagesWithData = async (
 
         // generate placeholder image
         const imageProps = await fetchImageProps(
-          `/${contentPath}/${path.dirname(pageName)}/${
-            meta.image ? meta.image : slug + '.jpg'
-          }`
+          `/${contentPath}/${slug}/${meta.image ? meta.image : slug + '.jpg'}`
         );
 
         return {

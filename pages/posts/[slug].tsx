@@ -59,7 +59,7 @@ const PostPage = ({ source, frontMatter }: PostPageProps): JSX.Element => {
 };
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
-  const postFilePath = path.join('public', POSTS_PATH, `${params.slug}.mdx`);
+  const postFilePath = path.join('public', POSTS_PATH, `${params.slug}`);
   const source = fs.readFileSync(postFilePath);
 
   const { content, data } = matter(source);

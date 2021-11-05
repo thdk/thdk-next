@@ -3,7 +3,6 @@ import { MetaProps } from '../types/layout';
 import { Breadcrumbs } from './breadcrumbs';
 import Head from './head';
 import Navigation from './navigation';
-import ThemeSwitch from './theme-switch';
 
 type LayoutProps = {
   children: React.ReactNode;
@@ -20,7 +19,6 @@ const Layout = ({ children, customMeta }: LayoutProps): JSX.Element => {
         <div className="max-w-5xl px-8 mx-auto">
           <div className="flex items-center justify-between py-6">
             <Navigation />
-            <ThemeSwitch />
           </div>
           <Breadcrumbs />
         </div>
