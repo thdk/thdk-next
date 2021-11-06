@@ -91,6 +91,7 @@ const ContentPage = ({
                     sizes="(max-width: 600px) 100vw, 1024/3vw"
                     objectFit="contain"
                     placeholder="blur"
+                    unoptimized
                   />
                 </div>
               </Link>
@@ -102,7 +103,12 @@ const ContentPage = ({
           {images.map(({ imageProps, imageExif }, i) => {
             return (
               <div key={i}>
-                <Image {...imageProps} objectFit="contain" placeholder="blur" />
+                <Image
+                  {...imageProps}
+                  objectFit="contain"
+                  placeholder="blur"
+                  unoptimized
+                />
                 {imageExif.ImageDescription}
               </div>
             );

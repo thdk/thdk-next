@@ -1,0 +1,12 @@
+.git
+/pages
+/components
+/contexts
+/lib
+/public
+/styles
+/test
+/types
+/utils
+node_modules
+.next

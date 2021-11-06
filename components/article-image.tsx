@@ -16,6 +16,7 @@ export const ArticleImage: React.FC<{
         objectFit="cover"
         width={width}
         height={height}
+        unoptimized
       />
       {caption && <div>{caption}</div>}
     </div>
