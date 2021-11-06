@@ -85,7 +85,7 @@ const ContentPage = ({
             return (
               <Link key={subPage} href={`/${category}/${page}/${subPage}`}>
                 <div>
-                  {title}
+                  <div className="truncate">{title}</div>
                   <Image
                     {...imageProps}
                     sizes="(max-width: 600px) 100vw, 1024/3vw"

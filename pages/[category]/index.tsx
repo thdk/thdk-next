@@ -30,7 +30,7 @@ const ContentCategoryPage = ({
         {pages.map(({ slug, imageProps, meta: { title } }) => (
           <Link key={slug} href={`/${category}/${slug}`}>
             <div>
-              {title}
+              <div className="truncate">{title}</div>
               <Image
                 {...imageProps}
                 sizes="(max-width: 600px) 100vw, 1024/3vw"

@@ -6,7 +6,7 @@ export const ArticleImage: React.FC<{
   width?: number;
   height?: number;
   caption?: string;
-}> = ({ basePath, src, width = 16, height = 9, caption }) => {
+}> = ({ basePath, src, width = 16, height = 10, caption }) => {
   const fullSrc = `${basePath}/${src}`;
   return (
     <div className="relative mb-4">
