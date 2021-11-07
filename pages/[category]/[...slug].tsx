@@ -117,7 +117,7 @@ const ContentPage = ({
 
         {parents.length > 0 ? (
           <div>
-            <Link href={`/${category}/${parentPage}`}>Back to overwiew</Link>
+            <Link href={`/${category}/${parentPage}`}>Back to overview</Link>
           </div>
         ) : null}
       </Layout>
