@@ -1,6 +1,4 @@
 import { parseISO } from 'date-fns';
-import fs from 'fs';
-import matter from 'gray-matter';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { serialize } from 'next-mdx-remote/serialize';
 import { MDXRemote, MDXRemoteSerializeResult } from 'next-mdx-remote';
@@ -20,6 +18,7 @@ import {
   getSubPages,
   getSubPagesWithData,
   ImageProps,
+  parseMarkdown,
 } from '../../utils/content-utils';
 import { parseExif } from '../../utils/parse-exif';
 
@@ -43,15 +42,19 @@ type PostPageProps = {
     slug: string;
     meta: MetaProps;
   }[];
+  basePath: string;
 };
 
 const ContentPage = ({
+  basePath,
   source,
-  frontMatter: { title, description, image, date },
+  frontMatter,
   images,
   subPages,
   parents,
 }: PostPageProps): JSX.Element => {
+  const { title, description, image, date } = frontMatter || {};
+
   const customMeta: MetaProps = {
     title: `${title}`,
     description: description,
@@ -68,7 +71,7 @@ const ContentPage = ({
   const components = {
     Head,
     Image: (props: ImageProps) => (
-      <ArticleImage {...props} basePath={`/${category}/${page}`} />
+      <ArticleImage {...props} basePath={`/${basePath}`} />
     ),
     Link,
   };
@@ -154,11 +157,12 @@ export const getStaticProps: GetStaticProps<any, any> = async ({
     )
   );
 
-  // content
-  const source = fs.readFileSync(articlePath);
+  const articleFolderPath = path.dirname(articlePath);
+
+  const md = await parseMarkdown(articlePath, articleFolderPath.substr(articleFolderPath.lastIndexOf('/') + 1));
 
   // meta
-  const { content, data } = matter(source);
+  const { content, meta } = md;
 
   // children
   const subPages = await getSubPagesWithData(relativePath);
@@ -172,16 +176,17 @@ export const getStaticProps: GetStaticProps<any, any> = async ({
       remarkPlugins: [require('remark-code-titles')],
       rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
     },
-    scope: data,
+    scope: meta,
   });
 
   return {
     props: {
       source: mdxSource,
-      frontMatter: data,
+      frontMatter: meta || null,
       images,
       subPages,
       parents,
+      basePath: relativePath,
     },
   };
 };

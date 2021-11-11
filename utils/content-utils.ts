@@ -6,10 +6,11 @@ import path from 'path';
 import { getPlaiceholder, IGetPlaiceholderReturn } from 'plaiceholder';
 import { capitalizeFirstLetter } from './text-utils';
 
-const parseMeta = async (mdPath: string, slug: string): Promise<Record<string, any>> => {
+export const parseMarkdown = async (mdPath: string, slug: string): Promise<Record<string, any>> => {
   // get metadata
   const {
     data: meta,
+    content,
   } = matter(
     fs.readFileSync(mdPath),
     {}, // disable caching because gray-matter uses md content (which is often empty) as cache key
@@ -30,7 +31,10 @@ const parseMeta = async (mdPath: string, slug: string): Promise<Record<string, a
     meta.image = images[0] || null;
   }
 
-  return meta;
+  return {
+    meta,
+    content,
+  };
 }
 
 export const getParentPages = (contentPath: string): string[] => {
@@ -54,17 +58,17 @@ export const getParentPagesWithData = <T extends Record<string, string>>(
     parentFolders.map(async (page) => {
       const pathElements = page.split('/');
       const slug = pathElements[pathElements.length - 1];
-      let meta = null;
+      let md = null;
       // get metadata
       try {
-        meta = await parseMeta(`${page}/${slug}.mdx`, slug);
+        md = await parseMarkdown(`${page}/${slug}.mdx`, slug);
       } catch (e) {
         // console.error(e);
         // index.mdx => no meta
       }
 
       return {
-        meta: meta || null,
+        meta: (md?.meta) || null,
         slug,
       };
     })
@@ -108,7 +112,8 @@ export const getSubPagesWithData = async (
         subPages.map(async (pageName) => {
           const slug = path.dirname(pageName);
 
-          const meta = await parseMeta(`${absolutePath}/${pageName}`, slug);
+          const md = await parseMarkdown(`${absolutePath}/${pageName}`, slug);
+          const meta = md.meta;
           // generate placeholder image
           const imageProps = await fetchImageProps(
             `/${contentPath}/${slug}/${meta.image ? meta.image : slug + '.jpg'}`
