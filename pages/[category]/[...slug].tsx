@@ -128,14 +128,19 @@ const ContentPage = ({
 export const getStaticProps: GetStaticProps<any, any> = async ({
   params: { slug: slugs, category },
 }) => {
-  const slug = Array.isArray(slugs) ? slugs[slugs.length - 1] : slugs;
-  const folder = Array.isArray(slugs) ? slugs.join('/') : slugs;
-  const relativePath = path.join(category, folder);
-  const absolutePath = path.join(process.cwd(), 'public', relativePath);
+  const folder = Array.isArray(slugs) ? slugs.join('/*') : slugs;
+
+  const articles = await glob(`${folder}/*.mdx`, {
+    cwd: path.join(process.cwd(), 'public', category),
+  });
+
+  const articlePath = path.join(process.cwd(), 'public', category, articles[0]);
+  const absolutePath = path.dirname(articlePath);
+  const relativePath = absolutePath.substr(absolutePath.indexOf(category));
 
   // images
   const images = await glob('gallery/*.jpg', {
-    cwd: absolutePath,
+    cwd: path.dirname(articlePath),
   }).then((imagePaths) =>
     Promise.all(
       imagePaths.map(async (image) => {
@@ -150,12 +155,7 @@ export const getStaticProps: GetStaticProps<any, any> = async ({
   );
 
   // content
-  let source;
-  try {
-    source = fs.readFileSync(`${absolutePath}/article.mdx`);
-  } catch {
-    source = fs.readFileSync(`${absolutePath}/${slug}.mdx`);
-  }
+  const source = fs.readFileSync(articlePath);
 
   // meta
   const { content, data } = matter(source);
@@ -193,7 +193,7 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
       return contentPages.map((page) => ({
         params: {
-          slug: path.dirname(page).split('/'),
+          slug: path.dirname(page).split('/').map((path) => path.substr(path.indexOf('_') + 1)),
           category,
         },
       }));
@@ -207,5 +207,4 @@ export const getStaticPaths: GetStaticPaths = async () => {
     fallback: false,
   };
 };
-
 export default ContentPage;

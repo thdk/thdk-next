@@ -4,6 +4,34 @@ import glob from 'glob-promise';
 import matter from 'gray-matter';
 import path from 'path';
 import { getPlaiceholder, IGetPlaiceholderReturn } from 'plaiceholder';
+import { capitalizeFirstLetter } from './text-utils';
+
+const parseMeta = async (mdPath: string, slug: string): Promise<Record<string, any>> => {
+  // get metadata
+  const {
+    data: meta,
+  } = matter(
+    fs.readFileSync(mdPath),
+    {}, // disable caching because gray-matter uses md content (which is often empty) as cache key
+  );
+
+  if (!meta.title) {
+    const titleParts = slug.substr(slug.indexOf('_') + 1).split('-')
+      .map((part) => capitalizeFirstLetter(part.trim()));
+
+    meta.title = titleParts.join(' - ');
+  }
+
+  if (!meta.image) {
+    const images = await glob('{gallery,images}/*.jpg', {
+      cwd: path.dirname(mdPath),
+    });
+
+    meta.image = images[0] || null;
+  }
+
+  return meta;
+}
 
 export const getParentPages = (contentPath: string): string[] => {
   let folderPath = path.resolve('public', contentPath, '../');
@@ -29,9 +57,7 @@ export const getParentPagesWithData = <T extends Record<string, string>>(
       let meta = null;
       // get metadata
       try {
-        const mdFile = await fs.promises.readFile(`${page}/${slug}.mdx`);
-        const { data } = matter(mdFile);
-        meta = data;
+        meta = await parseMeta(`${page}/${slug}.mdx`, slug);
       } catch (e) {
         // console.error(e);
         // index.mdx => no meta
@@ -72,38 +98,30 @@ export const getSubPages = (
  * @returns
  */
 export const getSubPagesWithData = async (
-  contentPath: string,
-  {
-    level = 1,
-  }: {
-    level?: number;
-    order?: 'asc' | 'desc';
-  } = {}
+  contentPath: string
 ): Promise<any> => {
   const absolutePath = path.resolve(process.cwd(), 'public', contentPath);
 
-  const subPages = await getSubPages(contentPath, level).then((subPages) => {
-    return Promise.all(
-      subPages.map(async (pageName) => {
-        const slug = path.dirname(pageName);
-        // get metadata
-        const { data: meta } = matter(
-          fs.readFileSync(`${absolutePath}/${pageName}`)
-        );
+  const subPages = await getSubPages(contentPath, 1)
+    .then((subPages) => {
+      return Promise.all(
+        subPages.map(async (pageName) => {
+          const slug = path.dirname(pageName);
 
-        // generate placeholder image
-        const imageProps = await fetchImageProps(
-          `/${contentPath}/${slug}/${meta.image ? meta.image : slug + '.jpg'}`
-        );
+          const meta = await parseMeta(`${absolutePath}/${pageName}`, slug);
+          // generate placeholder image
+          const imageProps = await fetchImageProps(
+            `/${contentPath}/${slug}/${meta.image ? meta.image : slug + '.jpg'}`
+          );
 
-        return {
-          imageProps,
-          slug,
-          meta,
-        };
-      })
-    );
-  });
+          return {
+            imageProps,
+            slug: slug.substr(slug.indexOf('_') + 1),
+            meta,
+          };
+        })
+      );
+    });
 
   return subPages.sort((a, b) => {
     if (a.meta.order && b.meta.order) {
