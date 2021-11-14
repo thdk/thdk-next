@@ -26,14 +26,14 @@ const ContentCategoryPage = ({
     <Layout>
       <h1 className="capitalize">{category}</h1>
 
-      <div className="flex grid grid-cols-1 md:grid-cols-3 gap-2">
+      <div className="flex grid grid-cols-1 md:grid-cols-2 md:grid-cols-3 gap-2">
         {pages.map(({ slug, imageProps, meta: { title } }) => (
           <Link key={slug} href={`/${category}/${slug}`}>
             <div>
               <div className="truncate">{title}</div>
               <Image
                 {...imageProps}
-                sizes="(max-width: 600px) 100vw, 1024/3vw"
+                sizes="(max-width: 640px) 33vw, (max-width: 768px) 50vw, 33vw"
                 objectFit="contain"
                 placeholder="blur"
               />

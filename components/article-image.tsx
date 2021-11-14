@@ -17,6 +17,7 @@ export const ArticleImage: React.FC<{
         objectFit="cover"
         width={width || portrait ? 10 : 16}
         height={height || portrait ? 16 : 10}
+        sizes="100vw"
       />
       {caption && <div>{caption}</div>}
     </div>

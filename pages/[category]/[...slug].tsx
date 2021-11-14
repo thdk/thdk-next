@@ -83,7 +83,7 @@ const ContentPage = ({
           <MDXRemote {...source} components={components} />
         </Article>
 
-        <div className="flex grid grid-cols-1 md:grid-cols-3 gap-2 mt-4">
+        <div className="flex grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 mt-4">
           {subPages.map(({ slug: subPage, imageProps, meta: { title } }) => {
             return (
               <Link key={subPage} href={`/${category}/${page}/${subPage}`}>
@@ -91,7 +91,7 @@ const ContentPage = ({
                   <div className="truncate">{title}</div>
                   <Image
                     {...imageProps}
-                    sizes="(max-width: 600px) 100vw, 1024/3vw"
+                    sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
                     objectFit="contain"
                     placeholder="blur"
                   />
@@ -105,7 +105,12 @@ const ContentPage = ({
           {images.map(({ imageProps, imageExif }, i) => {
             return (
               <div key={i}>
-                <Image {...imageProps} objectFit="contain" placeholder="blur" />
+                <Image
+                  {...imageProps}
+                  objectFit="contain"
+                  placeholder="blur"
+                  sizes="100vw"
+                />
                 {imageExif.ImageDescription}
               </div>
             );
