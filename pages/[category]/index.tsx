@@ -36,7 +36,6 @@ const ContentCategoryPage = ({
                 sizes="(max-width: 600px) 100vw, 1024/3vw"
                 objectFit="contain"
                 placeholder="blur"
-                unoptimized
               />
             </div>
           </Link>

@@ -94,7 +94,6 @@ const ContentPage = ({
                     sizes="(max-width: 600px) 100vw, 1024/3vw"
                     objectFit="contain"
                     placeholder="blur"
-                    unoptimized
                   />
                 </div>
               </Link>
@@ -106,12 +105,7 @@ const ContentPage = ({
           {images.map(({ imageProps, imageExif }, i) => {
             return (
               <div key={i}>
-                <Image
-                  {...imageProps}
-                  objectFit="contain"
-                  placeholder="blur"
-                  unoptimized
-                />
+                <Image {...imageProps} objectFit="contain" placeholder="blur" />
                 {imageExif.ImageDescription}
               </div>
             );
@@ -159,7 +153,10 @@ export const getStaticProps: GetStaticProps<any, any> = async ({
 
   const articleFolderPath = path.dirname(articlePath);
 
-  const md = await parseMarkdown(articlePath, articleFolderPath.substr(articleFolderPath.lastIndexOf('/') + 1));
+  const md = await parseMarkdown(
+    articlePath,
+    articleFolderPath.substr(articleFolderPath.lastIndexOf('/') + 1)
+  );
 
   // meta
   const { content, meta } = md;
@@ -198,7 +195,10 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
       return contentPages.map((page) => ({
         params: {
-          slug: path.dirname(page).split('/').map((path) => path.substr(path.indexOf('_') + 1)),
+          slug: path
+            .dirname(page)
+            .split('/')
+            .map((path) => path.substr(path.indexOf('_') + 1)),
           category,
         },
       }));
