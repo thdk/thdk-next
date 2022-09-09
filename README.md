@@ -2,7 +2,7 @@
 
 WIP: converting my personal wordpress site to a static nextjs site
 
-Currently hosted on app engine: https://includr.ew.r.appspot.com
+Currently hosted on app engine: https://thdk.vercel.app
 
 #### credits
 
